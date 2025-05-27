@@ -1,0 +1,92 @@
+import base64
+import json
+import os
+
+import cv2
+from playsound import playsound
+from termcolor import colored
+
+
+def get_str_from_file(file_path: str) -> str:
+    with open(file_path, "r", encoding="utf-8") as file:
+        return file.read()
+
+
+def play_mp3(file_path: str) -> None:
+    """
+    Plays the given MP3 file.
+
+    Args:
+    - file_path (str): The path to the MP3 file to be played.
+    """
+    try:
+        playsound(file_path)
+    except Exception as e:
+        print(colored(f"An error occurred while trying to play the file {file_path}:\n {e}", 'red'))
+        raise e
+
+
+def cat_json(input, json_file_path: str) -> None:
+    """
+    Concatenate data in a JSON file.
+    If the file does not exist, it will be created.
+
+    Args:
+    - input: The data to concatenate.
+    - json_file_path (str): The path to the JSON file.
+    """
+    try:
+        # Try to read the JSON file if it exists
+        try:
+            with open(json_file_path, "r", encoding="utf-8") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            # If the file does not exist, initialize an empty dictionary
+            data = {}
+
+        # Update the data with the input dictionary
+        data.update(input)
+
+        # Write the updated data back to the JSON file
+        with open(json_file_path, "w", encoding="utf-8") as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
+    except Exception as e:
+        print(colored(f"An error occurred while concatenating the dictionary with the JSON file {json_file_path}:\n {e}", 'red'))
+        raise e
+    
+def encode_image(image_path) -> str:
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+    
+def capture_cam(filename="medias/cam.jpg") -> None:
+    """
+    Capture an image from the webcam and save it to the specified filename.
+
+    Args:
+    - filename (str): The path where the captured image will be saved. Default is "medias/cam.jpg".
+    """
+    # Create the directory if it does not exist
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    cap = cv2.VideoCapture(0)  # 0 is usually the default camera
+    ret, frame = cap.read()
+    if ret:
+        cv2.imwrite(filename, frame)
+    cap.release()
+    return
+
+def is_visual_request(user_prompt: str) -> bool:
+    """
+    Check if the user input contains a visual request.
+
+    Args:
+    - user_input (str): The user prompt given as input.
+
+    Returns:
+    - bool: True if the input contains a visual request, False otherwise.
+    """
+    keywords = ["look at the camera", "what do you see", "what can you see", "what you see"]
+    user_prompt = user_prompt.lower()
+    if any(keyword in user_prompt for keyword in keywords):
+        return True
+    else:
+        return False

@@ -1,0 +1,14 @@
+# Ignore environment variables
+.env
+
+# Ignore media folders
+medias/
+linkedin_medias/
+
+# Ignore compiled Python caches
+__pycache__/
+
+# Ignore specific files
+hystory.json
+v_pers_mm_old.py
+post_notes.txt
