@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 
 from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
@@ -101,10 +100,7 @@ def speech_to_text():
             return text
         except:
             print("I didn't catch any speech...Please try again.")
-            # TODO: return None for the speech recognition
-            text = input("Type your prompt: ")
-            return text
-            # return None
+            return None
 
 
 def load_tts_model(api_key: str, model: str = "#g1_aura-asteria-en"):
@@ -163,6 +159,9 @@ def conversation_loop():
     # Load openai client
     client = init_aiml_client(AI_ML_API_KEY)
 
+    # Set True if you want text interaction using prompt
+    textual_interaction = True
+
     # Set to True if you want to use ElevenLabs TTS, otherwise it will use AIML TTS
     elevenlabs_voice = False
     if elevenlabs_voice:
@@ -171,9 +170,14 @@ def conversation_loop():
         voice_client = client
         url, headers, payload = load_tts_model(AI_ML_API_KEY)
 
-    # Select the model to interact with
-    # You can change the model to any other available model
-    model = "gpt-3.5-turbo"
+    """
+    In the next code line, select the model to interact with.
+    You can change the model to any other available model.
+    Reccomended models (already tested) are:
+    gpt-3.5-turbo, gpt-4, gpt-4o,  deepseek/deepseek-r1, gemini-2.0-flash,
+    qwen-turbo, gemini-1.5-pro, gemini-1.5-flash, qwen-plus
+    """
+    model = "gemini-1.5-pro"
 
     audio_fp = "medias/response.mp3"
     # Create the directory if it does not exist
@@ -182,19 +186,23 @@ def conversation_loop():
     # Flags to check different interaction states
     waking_up = False   # waiting for the wake word
     chatting = False    # continuing the conversation
-
-    # Dictionary to store the conversation history
-    response_dict = {}
     
     # Main loop
     while True:
-        # Listen to the user
-        user_prompt = speech_to_text()
+        if textual_interaction:
+            user_prompt = input(colored("Type your prompt: ", 'blue'))
+        else:
+            # Listen to the user
+            user_prompt = speech_to_text()
 
         # First interaction, check if the user said the wake word
-        if chatting == False and ASSISTANT_NAME.lower() in user_prompt.lower():
+        if user_prompt is not None and chatting == False and ASSISTANT_NAME.lower() in user_prompt.lower():
             waking_up = True
             chatting = True
+        elif user_prompt is not None and not textual_interaction:
+            print("*" * os.get_terminal_size().columns)
+            print(colored(f"User said:\n {user_prompt}", 'blue'))
+            print("*" * os.get_terminal_size().columns)
 
         # Continue the conversation since the wake word was detected
         while chatting:
@@ -202,7 +210,11 @@ def conversation_loop():
             if waking_up:
                 waking_up = False
             else:
-                user_prompt = speech_to_text()
+                if textual_interaction:
+                    user_prompt = input(colored("Type your prompt: ", 'blue'))
+                else:
+                    # Listen to the user
+                    user_prompt = speech_to_text()
             
             if user_prompt != None:
                 print("*" * os.get_terminal_size().columns)
@@ -230,6 +242,11 @@ def conversation_loop():
                     # Play the default goodbye message
                     play_mp3(audio_fp)
                     chatting = False
+                    
+                    record_history(
+                        user_prompt=user_prompt,
+                        text_response=text
+                    )
                     # Go back to the main loop, waiting for the wake word
                     break
                 
@@ -277,17 +294,10 @@ def conversation_loop():
                     print("*" * os.get_terminal_size().columns)
                     play_mp3(audio_fp)
 
-                    # Get the current datetime
-                    current_dtime = datetime.now()
-                    formatted_dtime = current_dtime.strftime("%Y-%m-%d %H:%M:%S")
-                    response_dict[formatted_dtime] = {
-                        "user_prompt": user_prompt,
-                        "model_response": text_response
-                    }
-                    # Save the conversation to a JSON file
-                    cat_json(response_dict, "hystory.json")
-                    # Reset the response dictionary for the next interaction
-                    response_dict = {}
+                    record_history(
+                        user_prompt=user_prompt,
+                        text_response=text_response
+                    )
                 else:
                     print(colored("Error: No response from the model!", 'red'))
                     return
