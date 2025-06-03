@@ -92,7 +92,24 @@ def is_visual_request(user_prompt: str) -> bool:
         return True
     else:
         return False
+    
 
+def is_goodbye(user_prompt: str) -> bool:
+    """
+    Check if the user input contains a goodbye phrase.
+
+    Args:
+    - user_prompt (str): The user prompt given as input.
+
+    Returns:
+    - bool: True if the input contains a goodbye phrase, False otherwise.
+    """
+    goodbye_keywords = ["goodbye", "bye", "see you later", "see you soon", "take care"]
+    user_prompt = user_prompt.lower()
+    if any(keyword in user_prompt for keyword in goodbye_keywords):
+        return True
+    else:
+        return False
 
 def record_history(user_prompt: str, text_response: str) -> None:
     """

@@ -13,7 +13,7 @@ from utils import *
 
 # Load global variables
 SYS_PROMPT = get_str_from_file("system_prompt.txt")
-ASSISTANT_NAME = "Aura"
+ASSISTANT_NAME = "Nova"
 
 # Load environment variables from the .env file
 load_dotenv()
@@ -53,22 +53,22 @@ def ask_mllm(client:OpenAI, model:str, system_prompt: str, user_prompt: str) -> 
         capture_cam(img_fp)
         base64_image = encode_image(os.path.join(os.getcwd(), img_fp))
         completion = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": f"What do you see in this image?"},
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{base64_image}",
-                            },
+    messages=[
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "What do you see in this image?"},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
                         },
-                    ],
-                }
-            ],
-            model="openai/gpt-4o",
-        )
+                    },
+                ],
+            }
+        ],
+        model="openai/gpt-4o",  # or any other model that supports image input
+    )
     else:
         # Set the model and compose message
         completion = client.chat.completions.create(
@@ -160,7 +160,7 @@ def conversation_loop():
     client = init_aiml_client(AI_ML_API_KEY)
 
     # Set True if you want text interaction using prompt
-    textual_interaction = True
+    textual_interaction = False
 
     # Set to True if you want to use ElevenLabs TTS, otherwise it will use AIML TTS
     elevenlabs_voice = False
@@ -171,13 +171,13 @@ def conversation_loop():
         url, headers, payload = load_tts_model(AI_ML_API_KEY)
 
     """
-    In the next code line, select the model to interact with.
+    Select the LLM to interact with.
     You can change the model to any other available model.
     Reccomended models (already tested) are:
     gpt-3.5-turbo, gpt-4, gpt-4o,  deepseek/deepseek-r1, gemini-2.0-flash,
     qwen-turbo, gemini-1.5-pro, gemini-1.5-flash, qwen-plus
     """
-    model = "gemini-1.5-pro"
+    model = "gpt-3.5-turbo"
 
     audio_fp = "medias/response.mp3"
     # Create the directory if it does not exist
@@ -220,10 +220,10 @@ def conversation_loop():
                 print("*" * os.get_terminal_size().columns)
                 print(colored(f"User said:\n {user_prompt}", 'blue'))
 
-                # If the user says "goodbye", stop the conversation
+                # If the user says goodbye, stop the conversation
                 # until the next wake word is detected.
-                if "goodbye" in user_prompt.lower():
-                    text=f"Goodbye! Say {ASSISTANT_NAME} if you'll need more help. See you soon!"
+                if is_goodbye(user_prompt):
+                    text=f"Goodbye! Say {ASSISTANT_NAME}, if you'll need more help. See you soon!"
                     # Switch between TTS providers
                     if elevenlabs_voice:
                         text_to_speech_elevenlabs(
@@ -239,6 +239,11 @@ def conversation_loop():
                             payload=payload,
                             output_file=audio_fp
                         )
+                    print("*" * os.get_terminal_size().columns)
+                    print(colored(f"User said:\n {user_prompt}", 'blue'))
+                    print(colored(f"\n{ASSISTANT_NAME} said:\n {text}", 'green'))
+                    print("*" * os.get_terminal_size().columns)
+
                     # Play the default goodbye message
                     play_mp3(audio_fp)
                     chatting = False
@@ -290,7 +295,7 @@ def conversation_loop():
                             payload=payload,
                             output_file=audio_fp
                         )
-                    print(colored(f"\n{ASSISTANT_NAME} said: {text_response}", 'green'))
+                    print(colored(f"\n{ASSISTANT_NAME} said:\n {text_response}", 'green'))
                     print("*" * os.get_terminal_size().columns)
                     play_mp3(audio_fp)
 
