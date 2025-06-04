@@ -60,12 +60,28 @@ python assistant.py
 
 ---
 
-## ⚙️ Customization
+## 🛠️ Interaction Modes and Voice Options
 
-You can personalize your experience in several ways:
+You can configure how you interact with Nova directly from the command line:
 
-* **Interaction Mode**: Choose between verbal or textual interaction via CLI arguments.
-* **Voice Provider**: Pick between AIMLAPI and ElevenLabs.
+* **Interaction Mode**: Nova defaults to verbal interaction. If you prefer text mode, use -t argument:
+
+  ```bash
+  python assistant.py -t
+  ```
+
+* **Voice Provider**: The default voice model is from AIMLAPI. To use one of the ElevenLabs TTS models instead, use -el argument:
+
+  ```bash
+  python assistant.py -el
+  ```
+
+---
+
+## ⚙️ Advanced Customization
+
+You can personalize your experience even further:
+
 * **Assistant Name**: Set a custom name for your assistant.
 * **LLM Model Parameters**: Modify the model to interrogate, including temperature, max tokens, etc.
 * **Voice Speed**: Adjust speaking speed to your preference.
