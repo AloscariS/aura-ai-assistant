@@ -90,4 +90,4 @@ All of these options can be fine-tuned by editing the relevant parts of the `ass
 
 ---
 
-Enjoy building with Nova! 🌟
+Enjoy chatting with Nova! 🌟
