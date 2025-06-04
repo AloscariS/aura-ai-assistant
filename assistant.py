@@ -14,14 +14,13 @@ from utils import *
 # Load global variables
 SYS_PROMPT = get_str_from_file("system_prompt.txt")
 ASSISTANT_NAME = "Nova"
-
 # Load environment variables from the .env file
 load_dotenv()
 AI_ML_API_KEY = os.getenv("AIML_API_KEY")
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 
 
-def init_aiml_client(aiml_key:str, base_url: str = "https://api.aimlapi.com/v1"):
+def init_openai_client(aiml_key:str, base_url: str = "https://api.aimlapi.com/v1"):
     client = OpenAI(api_key=AI_ML_API_KEY, base_url=base_url)
     return client
 
@@ -45,7 +44,7 @@ def ask_mllm(client:OpenAI, model:str, system_prompt: str, user_prompt: str) -> 
     - user_prompt (str): The user's prompt or question.
     
     Returns:
-    - str: The response from the LLM.
+    - str: The response from the model.
     """
     # Handle the image understanding and captioning
     if is_visual_request(user_prompt):
@@ -67,10 +66,10 @@ def ask_mllm(client:OpenAI, model:str, system_prompt: str, user_prompt: str) -> 
                 ],
             }
         ],
-        model="openai/gpt-4o",  # or any other model that supports image input
+        model="openai/gpt-4o",  # Recommended model for image understanding
     )
     else:
-        # Set the model and compose message
+        # Set the model and compose the message
         completion = client.chat.completions.create(
             model=model,
             messages=[
@@ -123,7 +122,7 @@ def text_to_speech_aiml(text: str, url:str, headers:dict, payload:dict, output_f
     try:
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
-        # Writing the audio to a file
+        # Write the audio to a file
         with open(output_file, "wb") as f:
             f.write(response.content)
 
@@ -133,7 +132,7 @@ def text_to_speech_aiml(text: str, url:str, headers:dict, payload:dict, output_f
 
 
 def text_to_speech_elevenlabs(text: str, output_file: str = "output.mp3", client: ElevenLabs = None):
-    # Calling the text_to_speech conversion API with detailed parameters
+    # Call the text_to_speech conversion API with detailed parameters
     response = client.text_to_speech.convert(
         voice_id="FGY2WhTYpPnrIDTdsKH5",
         output_format="mp3_22050_32",
@@ -157,13 +156,13 @@ def text_to_speech_elevenlabs(text: str, output_file: str = "output.mp3", client
 
 def conversation_loop():
     # Load openai client
-    client = init_aiml_client(AI_ML_API_KEY)
+    client = init_openai_client(AI_ML_API_KEY)
 
     # Set True if you want text interaction using prompt
-    textual_interaction = False
-
+    textual_interaction = True
     # Set to True if you want to use ElevenLabs TTS, otherwise it will use AIML TTS
     elevenlabs_voice = False
+
     if elevenlabs_voice:
         voice_client = init_elevenlabs_client(ELEVENLABS_API_KEY)
     else:
@@ -285,7 +284,7 @@ def conversation_loop():
                         text_to_speech_elevenlabs(
                             text=text_response,
                             output_file=audio_fp,
-                            client=client
+                            client=voice_client
                         )
                     else:
                         text_to_speech_aiml(
