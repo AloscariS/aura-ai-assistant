@@ -86,7 +86,7 @@ You can personalize your experience even further:
 * **Voice Speed**: Adjust speaking speed to your preference.
 * **System Prompt**: Customize the assistant's base personality and instructions.
 
-All of these options can be fine-tuned by editing the relevant parts of the `assistant.py` script.
+These and other options can be fine-tuned by editing the relevant parts of the `assistant.py` script.
 
 ---
 
