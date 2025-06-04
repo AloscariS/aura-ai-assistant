@@ -1,11 +1,12 @@
+import argparse
 import os
 
-from elevenlabs import VoiceSettings
-from elevenlabs.client import ElevenLabs
 import openai
 import requests
 import speech_recognition as sr
 from dotenv import load_dotenv
+from elevenlabs import VoiceSettings
+from elevenlabs.client import ElevenLabs
 from openai import OpenAI
 from termcolor import colored
 
@@ -154,14 +155,9 @@ def text_to_speech_elevenlabs(text: str, output_file: str = "output.mp3", client
                 f.write(chunk)
  
 
-def conversation_loop():
+def conversation_loop(textual_interaction = False, elevenlabs_voice = False):
     # Load openai client
     client = init_openai_client(AI_ML_API_KEY)
-
-    # Set True if you want text interaction using prompt
-    textual_interaction = True
-    # Set to True if you want to use ElevenLabs TTS, otherwise it will use AIML TTS
-    elevenlabs_voice = False
 
     if elevenlabs_voice:
         voice_client = init_elevenlabs_client(ELEVENLABS_API_KEY)
@@ -308,4 +304,13 @@ def conversation_loop():
 
 
 if __name__ == "__main__":
-    conversation_loop()
+    parser = argparse.ArgumentParser()
+    # Adding optional argument
+    parser.add_argument("-t", "--textual", help = "Enable Textual Interaction", action='store_true')
+    parser.add_argument("-el", "--el_voice", help = "Enable ElevenLabs Voice", action='store_true')
+    args = parser.parse_args()
+
+    conversation_loop(
+        textual_interaction=args.textual,
+        elevenlabs_voice=args.el_voice
+    )
