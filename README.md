@@ -1,7 +1,6 @@
 # Nova AI Assistant
 
-Nova is a friendly AI assistant you can use to ask whatever you want. It supports multimodal interaction, including text, audio, and image processing, so you can even ask it to describe what it sees through a connected camera.
-You can choose between textual and verbal communication.
+Nova is a friendly and customizable AI assistant that supports multimodal interaction, including text, audio, and image processing. You can talk to it verbally or interact with it through text, and even ask it to describe what it sees through a connected camera. 
 
 ---
 
