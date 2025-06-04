@@ -1,4 +1,4 @@
-name: aura
+name: nova
 channels:
   - pytorch
   - nvidia
@@ -349,4 +349,3 @@ dependencies:
       - yarl==1.18.3
       - zipp==3.21.0
       - zstandard==0.23.0
-prefix: /home/sebastiano/anaconda3/envs/prova
